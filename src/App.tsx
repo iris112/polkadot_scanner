@@ -2,25 +2,38 @@ import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
 import {
-  Formik, Form, Field, ErrorMessage, FormikHelpers,
+  Formik, Form, FormikHelpers,
 } from 'formik';
 import * as Yup from 'yup';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import parseData, { BlockEvent } from './Data';
+import EventDataTable from './Components/EventDataTable';
+import FilterBar from './Components/FilterComponent';
+import debounce from 'lodash/debounce';
+import _ from "lodash";
 import './App.css';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    container: {
+    formContainer: {
+      paddingTop: theme.spacing(10),
       textAlign: "center",
+    },
+    dataContainer: {
+      marginTop: theme.spacing(10),
     },
     textField: {
       margin: theme.spacing(5),
     },
     errorField: {
       color: "red"
+    },
+    progressBar: {
+      marginTop: theme.spacing(3),
     },
   }),
 );
@@ -31,20 +44,12 @@ interface MyFormValues {
   endPoint: string;
 }
 
-interface MyEventInfos {
-  name: string;
-  argument: string;
-  docs: string;
-}
-
-interface MyBlockEvents {
-  blockNumber: number,
-  events: Array<MyEventInfos>
-}
-
 const App:React.FC = () => {
   const classes = useStyles();
-  const [resultData, setResultData] = useState<Array<MyBlockEvents>>([]);
+  const [resultData, setResultData] = useState<Array<BlockEvent>>([]);
+  const [filteredData, setFilteredData] = useState<Array<BlockEvent>>([]);
+  const [filterEventName, setFilterEventName] = useState<string>("");
+  const [progress, setProgress] = useState<number>(0);
   const [submitDisable, setSubmitDisable] = useState<boolean>(true);
   const [errorString, setErrorString] = useState<string>("");
   const initialValues: MyFormValues = { 
@@ -52,40 +57,48 @@ const App:React.FC = () => {
     endNumber: 0, 
     endPoint: "wss://rpc.polkadot.io"
   };
+
+  useEffect(debounce(() => {
+    if (filterEventName != '')
+      filteringData();
+    else
+      setFilteredData([...resultData]);
+  }, 800), [resultData, filterEventName])
+
+  const filteringData = () => {
+    setFilteredData(_.filter(resultData, (item) => item.eventName.includes(filterEventName) ));
+  }
+
+  const fetchStart = () => {
+    setSubmitDisable(true);
+    setResultData([]);
+    setProgress(1);
+  }
+
+  const fetchEnd = () => {
+    setSubmitDisable(false);
+    setTimeout(() => setProgress(0), 800);
+  }
   
   const handleSubmit = (values:MyFormValues, actions:FormikHelpers<MyFormValues>) => {
     const wsProvider = new WsProvider(values.endPoint);
     
-    setSubmitDisable(true);
+    fetchStart();
+    
     ApiPromise.create({ provider: wsProvider })
       .then(async (api) => {
-        const resultData = new Array<MyBlockEvents>();
+        const resultData = new Array<BlockEvent>();
         for (let i = values.startNumber; i <= values.endNumber; i++) {
-          const blockHash = await api.rpc.chain.getBlockHash(i);
-          const allRecords = await api.query.system.events.at(blockHash);
-          const blockEvents: MyBlockEvents = { blockNumber: i, events: [] }
-          allRecords.forEach((record) => {
-            // Extract the phase, event and the event types
-            const { event, phase } = record;
-            const types = event.typeDef;
-
-            // Extract the arguments info
-            const args: string = event.data.map((data, index) => `${types[index].type}: ${data.toString()}`).join("\n");
-
-            blockEvents.events.push({
-              name: event.method ?? event.meta.name.toString(),
-              argument: args,
-              docs: event.meta.docs.toString()
-            })
-          })
-          resultData.push(blockEvents);
+          resultData.push(...await parseData(api, i));
+          setProgress(100 * (i - values.startNumber + 1) / (values.endNumber - values.startNumber + 1));
         }
-        setResultData(resultData);
-        setSubmitDisable(false);
+
+        fetchEnd();
+        setTimeout(() => setResultData(resultData), 800);
       })
       .catch((error) => {
         setErrorString(error.toString());
-        setSubmitDisable(false);
+        fetchEnd();
       });
   };
 
@@ -97,7 +110,7 @@ const App:React.FC = () => {
     endNumber: Yup.number()
       .typeError('Must be a number')
       .positive('Must be greater than zero')
-      .moreThan(Yup.ref('startNumber'), "Should be begger than start block number")
+      .min(Yup.ref('startNumber'), "Should be begger than start block number")
       .required('Required'),
     endPoint: Yup.string()
       .matches(
@@ -110,7 +123,7 @@ const App:React.FC = () => {
   return (
     <>
       
-      <Container className={classes.container}>
+      <Container className={classes.formContainer}>
         <Formik
           initialValues={initialValues}
           onSubmit={handleSubmit}
@@ -124,7 +137,7 @@ const App:React.FC = () => {
             } = props;
 
             const onChange = (e: React.ChangeEvent<any>) => {
-              setSubmitDisable(values === initialValues);
+              setSubmitDisable(values === initialValues || progress > 0);
               handleChange(e);
             }
 
@@ -170,11 +183,21 @@ const App:React.FC = () => {
                       Scan
                   </Button>
                 </Box>
+                
+                {progress > 0 && (
+                  <LinearProgress className={classes.progressBar} variant="determinate" value={progress}/>
+                )}
               </Form>
             );
           }}
         </Formik>
       </Container>
+      {resultData.length > 0 && (
+          <Container className={classes.dataContainer}>
+            <FilterBar handleChange={setFilterEventName} filterEventName={filterEventName}/>
+            <EventDataTable rows={filteredData}/>
+          </Container>
+      )}
     </>
   );
 }
