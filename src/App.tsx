@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
@@ -13,6 +14,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import parseData, { BlockEvent } from './Data';
 import EventDataTable from './Components/EventDataTable';
 import FilterBar from './Components/FilterComponent';
+import { selectResultData, setResultData } from './Store/eventDataSlice';
+import { selectFilterEventName } from './Store/filterEventSlice';
 import debounce from 'lodash/debounce';
 import _ from "lodash";
 import './App.css';
@@ -46,9 +49,10 @@ interface MyFormValues {
 
 const App:React.FC = () => {
   const classes = useStyles();
-  const [resultData, setResultData] = useState<Array<BlockEvent>>([]);
+  const dispatch = useDispatch();
+  const resultData = useSelector(selectResultData);
+  const filterEventName = useSelector(selectFilterEventName);
   const [filteredData, setFilteredData] = useState<Array<BlockEvent>>([]);
-  const [filterEventName, setFilterEventName] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
   const [submitDisable, setSubmitDisable] = useState<boolean>(true);
   const [errorString, setErrorString] = useState<string>("");
@@ -71,7 +75,7 @@ const App:React.FC = () => {
 
   const fetchStart = () => {
     setSubmitDisable(true);
-    setResultData([]);
+    dispatch(setResultData([]));
     setProgress(1);
   }
 
@@ -94,7 +98,7 @@ const App:React.FC = () => {
         }
 
         fetchEnd();
-        setTimeout(() => setResultData(resultData), 800);
+        setTimeout(() => dispatch(setResultData(resultData)), 800);
       })
       .catch((error) => {
         setErrorString(error.toString());
@@ -194,7 +198,7 @@ const App:React.FC = () => {
       </Container>
       {resultData.length > 0 && (
           <Container className={classes.dataContainer}>
-            <FilterBar handleChange={setFilterEventName} filterEventName={filterEventName}/>
+            <FilterBar/>
             <EventDataTable rows={filteredData}/>
           </Container>
       )}
