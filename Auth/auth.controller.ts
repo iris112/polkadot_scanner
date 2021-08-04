@@ -31,11 +31,7 @@ class AuthController {
             expiresIn: tokenExpirationInSeconds,
           });
 
-          return res.status(200).json({
-            success: true,
-            data: user,
-            token,
-          });
+          return res.cookie("token", token, { secure: true, httpOnly: true}).redirect("/");
         }
       } else {
         log("User Not Found");
@@ -76,12 +72,13 @@ class AuthController {
           const token = jwt.sign({ username, password }, jwtSecret, {
             expiresIn: tokenExpirationInSeconds,
           });
-
-          return res.status(200).json({
-            success: true,
-            data: newUser,
-            token,
+          
+          res.cookie("token", token, {
+            secure: true,
+            httpOnly: true
           });
+
+          return res.cookie("token", token, { secure: true, httpOnly: true}).redirect("/");
         } catch (e) {
           log("Controller capturing error", e);
           return res

@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/iris112/polkadot_scanner#readme",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.2",
     "@types/express-unless": "^0.5.2",
+    "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",

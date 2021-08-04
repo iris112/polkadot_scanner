@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import * as http from "http";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import debug, { IDebugger } from "debug";
 import dotenv from "dotenv";
 dotenv.config({});
@@ -21,11 +22,10 @@ declare global {
   }
 }
 
-
-
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
+app.use(cookieParser());
 app.use(JWT.authenticateJWTExcept("/login", "/signup"));
 app.use(express.static(process.cwd() + "/web-app/build/"));
 

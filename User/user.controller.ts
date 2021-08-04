@@ -16,6 +16,10 @@ class UserController {
       next(e);
     }
   }
+
+  getHome(req:any, res:Response, next:NextFunction) {
+    return res.sendFile(process.cwd() + "/web-app/build/index.html");
+  }
 }
 
 export default new UserController();

@@ -7,11 +7,10 @@ const log: IDebugger = debug("middleware:JWT");
 
 class JWT {
   authenticateJWT(req: Request, res: Response, next: NextFunction) {
-    const authHeader = req.headers.authorization;
-    console.log(req);
-    if (authHeader && authHeader !== "null") {
+    const authToken = req.cookies.token;
+    if (authToken && authToken !== "null") {
       log("auth Header", JWT_KEY);
-      jwt.verify(authHeader, JWT_KEY, (err: any, user: any) => {
+      jwt.verify(authToken, JWT_KEY, (err: any, user: any) => {
         if (err) {
           log("Error", err);
           return res
