@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -60,7 +60,7 @@ const App:React.FC = () => {
     endPoint: "wss://rpc.polkadot.io"
   };
 
-  useEffect(debounce(() => {
+  useMemo(debounce(() => {
     if (filterEventName != '')
       filteringData();
     else
