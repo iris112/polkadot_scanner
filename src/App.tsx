@@ -6,14 +6,12 @@ import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
-import {
-  Formik, Form, FormikHelpers,
-} from 'formik';
+import { Formik, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import parseData, { BlockEvent } from './Data';
 import EventDataTable from './Components/EventDataTable';
-import FilterBar from './Components/FilterComponent';
+import FilterBar from './Components/FilterBar';
 import { selectResultData, setResultData } from './Store/eventDataSlice';
 import { selectFilterEventName } from './Store/filterEventSlice';
 import debounce from 'lodash/debounce';
@@ -98,6 +96,7 @@ const App:React.FC = () => {
         }
 
         fetchEnd();
+        api.disconnect();
         setTimeout(() => dispatch(setResultData(resultData)), 800);
       })
       .catch((error) => {
@@ -156,6 +155,7 @@ const App:React.FC = () => {
                   onChange={onChange}
                   helperText={errors.startNumber}
                   error={errors.startNumber ? true : false}
+                  data-testid="start-number"
                   required/>
                 <TextField 
                   className={classes.textField} 
@@ -166,6 +166,7 @@ const App:React.FC = () => {
                   onChange={onChange}
                   helperText={errors.endNumber}
                   error={errors.endNumber ? true : false}
+                  data-testid="end-number"
                   required/>
                 <TextField 
                   className={classes.textField} 
@@ -176,6 +177,7 @@ const App:React.FC = () => {
                   onChange={handleChange}
                   helperText={errors.endPoint}
                   error={errors.endPoint ? true : false}
+                  data-testid="end-point"
                   required/>
                 <p className={classes.errorField}>{errorString}</p>
                 <Box>
@@ -183,13 +185,14 @@ const App:React.FC = () => {
                     type="submit" 
                     variant="contained" 
                     color="primary"
-                    disabled={submitDisable || errors.startNumber || errors.endNumber || errors.endPoint ? true : false}>
+                    disabled={submitDisable || errors.startNumber || errors.endNumber || errors.endPoint ? true : false}
+                    data-testid="btn-scan">
                       Scan
                   </Button>
                 </Box>
                 
                 {progress > 0 && (
-                  <LinearProgress className={classes.progressBar} variant="determinate" value={progress}/>
+                  <LinearProgress className={classes.progressBar} variant="determinate" value={progress} data-testid="progress-bar"/>
                 )}
               </Form>
             );

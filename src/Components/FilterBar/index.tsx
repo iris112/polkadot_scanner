@@ -25,7 +25,7 @@ const FilterBar:React.FC = () => {
     <div className={classes.filterBar}>
       <FormControl>
         <InputLabel htmlFor="component-simple">Filter By Event Name</InputLabel>
-        <Input id="component-simple" value={filterEventName} onChange={(e) => dispatch(setFilterEventName(e.target.value))} />
+        <Input id="component-simple" value={filterEventName} data-testid="filter-event" onChange={(e) => dispatch(setFilterEventName(e.target.value))} />
       </FormControl>
     </div>
   );
