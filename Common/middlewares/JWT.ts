@@ -13,9 +13,7 @@ class JWT {
       jwt.verify(authToken, JWT_KEY, (err: any, user: any) => {
         if (err) {
           log("Error", err);
-          return res
-            .status(403)
-            .send({ success: false, message: "Token Expired" });
+          return res.redirect('/login');;
         }
         req.user = user;
         next();

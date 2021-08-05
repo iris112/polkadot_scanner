@@ -1,6 +1,6 @@
-import User from "../User/user.model";
-import { IUser } from "../User/user.interface";
-class AuthService {
+import User from "../../User/user.model";
+import { IUser } from "../../User/user.interface";
+class UserService {
   async createUser(data: IUser) {
     try {
       const user = User.build(data);
@@ -17,4 +17,4 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+export default new UserService();

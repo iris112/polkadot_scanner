@@ -22,8 +22,8 @@ class MongooseService {
   }
 
   connectWithRetry() {
-    log("process.env.MONGODB_URI", process.env.MONGODB_URI);
-    const MONGODB_URI = process.env.MONGODB_URI || "";
+    const MONGODB_URI = (process.env.NODE_ENV === 'test' ? process.env.MONGODB_URI_TEST : process.env.MONGODB_URI) || "";
+    log("process.env.MONGODB_URI", MONGODB_URI);
     log("Connecting to MongoDB(Retry when failed)");
     mongoose
       .connect(MONGODB_URI, this.mongooseOptions)

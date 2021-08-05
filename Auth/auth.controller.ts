@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import AuthService from "./auth.service";
+import UserService from "../Common/services/user";
 import jwt from "jsonwebtoken";
 import debug, { IDebugger } from "debug";
 import { Password } from "../Common/services/password";
@@ -15,8 +15,8 @@ class AuthController {
     try {
       const email = req.body.email;
       const password = req.body.password;
-
-      const user = await AuthService.findUserByEmail(email);
+      
+      const user = await UserService.findUserByEmail(email);
       log("user", user);
       if (user) {
         const isPasswordMatch = await Password.compare(user.password, password);
@@ -55,7 +55,7 @@ class AuthController {
           .status(403)
           .send({ success: false, message: "Username, Email, Password are required" });
 
-      const user = await AuthService.findUserByEmail(email);
+      const user = await UserService.findUserByEmail(email);
       log("user", user);
       if (user) {
         return res
@@ -63,7 +63,7 @@ class AuthController {
           .send({ success: false, message: "User Already Exist" });
       } else {
         try {
-          const newUser = await AuthService.createUser({
+          const newUser = await UserService.createUser({
             username,
             email,
             password,

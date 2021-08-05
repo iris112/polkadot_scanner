@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import UserService from "./user.service";
+import UserService from "../Common/services/user";
 class UserController {
   constructor() {}
 
@@ -15,10 +15,6 @@ class UserController {
     } catch (e) {
       next(e);
     }
-  }
-
-  getHome(req:any, res:Response, next:NextFunction) {
-    return res.sendFile(process.cwd() + "/web-app/build/index.html");
   }
 }
 
