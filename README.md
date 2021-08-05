@@ -30,6 +30,10 @@ Node.js version is v16.0.0
 
 ### `Next run the backend (./)`
 
+Copy .env.sample file to .env with same content
+
+And install mongodb
+
 - yarn install
 - yarn test
 - yarn start
