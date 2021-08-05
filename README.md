@@ -1,10 +1,12 @@
 # Polkadot Scanner
 
-This project was developed by using MERN stack including frontend and backend.
-Both app has unit test by using jest.
+This project was developed by using **MERN** stack including frontend and backend.
+
+**This app has additional very simple feature of login and signup to create user and limit the access to scanner web.**
+
+To see scanner web, first need to signup and login (something like entering password)
 
 Deployed URL: [https://polkadot-scan.herokuapp.com/](https://polkadot-scan.herokuapp.com/)
-
 
 ## Technical stack
 
@@ -13,6 +15,7 @@ Deployed URL: [https://polkadot-scan.herokuapp.com/](https://polkadot-scan.herok
 - Typescript
 - Node.js (Express)
 - MongoDB
+- jest (UnitTest)
 
 ## `Compile`
 
